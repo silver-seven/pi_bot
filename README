@@ -1,0 +1,6 @@
+#Notes
+docker buildx build --platform linux/arm64 -t pibot .
+docker run --platform linux/arm64 --name test pibot
+docker cp test:/workspace/server/build/src/server .
+execute ./build/server
+
