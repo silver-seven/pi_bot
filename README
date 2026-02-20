@@ -1,12 +1,20 @@
-#Notes
-docker buildx build --platform linux/arm64 -t pibot .
-docker run --platform linux/arm64 --name test pibot
-docker cp test:/workspace/server/build/src/server .
-execute ./build/server
+# Notes
+BMP files must be converted to 16bit BMP files 
 
-#References
+# Build
+docker buildx build --platform linux/arm64 -t pibot .
+docker run --platform linux/arm64 --name test -it --rm pibot scp {PI_ADDRESS}
+
+# Hardware
+Raspberry Pi 4 Model B
+Adafruit TFT Feathering 2.4"
+
+# References
 https://github.com/WiringPi/WiringPi
 https://github.com/adafruit/Adafruit-GFX-Library/
 https://github.com/adafruit/Adafruit_ILI9341/blob/master/Adafruit_ILI9341.h
 https://cdn-shop.adafruit.com/datasheets/ILI9341.pdf
 https://learn.adafruit.com/adafruit-2-4-color-tft-touchscreen-breakout/python-wiring-and-setup#2-dot-4-2-dot-8-3-dot-2-and-3-dot-5-displays-3042603
+
+# TODO
+Be able to read any BMP files

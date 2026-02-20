@@ -10,6 +10,7 @@ target_link_libraries(${project_name}
   ${Boost_LIBRARIES} 
   wiringPi
 )
-add_subdirectory(httpconnection)
+add_subdirectory(lib/httpconnection)
 add_subdirectory(lib/AdafruitGFX)
 add_subdirectory(lib/drivers)
+add_subdirectory(lib/BMPReader)

@@ -11,23 +11,20 @@ RUN apt-get update && apt-get install -y \
     libboost-all-dev \
     iputils-ping \
     curl \
-    wget \
     tar
 
 RUN curl -OL https://github.com/WiringPi/WiringPi/releases/download/3.18/wiringpi_3.18_arm64.deb
-
 RUN apt install -y ./wiringpi_3.18_arm64.deb
 
-RUN mkdir server server/src
-COPY src/ server/src/
-COPY CMakeLists.txt server
+RUN mkdir src
+COPY src/ ./src/
+COPY CMakeLists.txt .
 
-WORKDIR /workspace/server
 RUN cmake -B ./build -S .
 RUN cmake --build ./build
 
 EXPOSE 8080/tcp
 EXPOSE 8080/udp
-CMD ./build/src/server
+# CMD ./build/src/server
 # CMD ./build/src/server 0.0.0.0 8080
 

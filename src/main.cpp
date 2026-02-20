@@ -15,65 +15,11 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include <thread>
-#include <fstream>
-#include <vector>
-
-
-#pragma pack(push, 1)
-struct BMPFileHeader {
-    uint16_t file_type{0x4D42}; // "BM"
-    uint32_t file_size{0};
-    uint16_t reserved1{0};
-    uint16_t reserved2{0};
-    uint32_t offset_data{0};    // Start of pixel data
-};
-
-struct BMPInfoHeader {
-    uint32_t size{0};
-    int32_t width{0};
-    int32_t height{0};
-    uint16_t planes{1};
-    uint16_t bit_count{0};      // 24 for RGB
-    uint32_t compression{0};
-    uint32_t size_image{0};
-    int32_t x_pixels_per_meter{0};
-    int32_t y_pixels_per_meter{0};
-    uint32_t colors_used{0};
-    uint32_t colors_important{0};
-};
-#pragma pack(pop)
-
-
-void readBMP(char* filename, std::vector<uint8_t>& bmp, BMPFileHeader& fileHeader, BMPInfoHeader& infoHeader);
-void readBMP(char* filename, std::vector<uint8_t>& bmp, BMPFileHeader& fileHeader, BMPInfoHeader& infoHeader) {
-    std::ifstream file(filename, std::ios::binary);
-    if (!file) 
-    {
-      std::cout << "Invalid file" << std::endl;
-      return;
-    }
-
-    file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
-    file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
-
-    // Jump to the pixel data
-    file.seekg(fileHeader.offset_data, std::ios::beg);
-
-    bmp.resize(infoHeader.size_image);
-    file.read(reinterpret_cast<char*>(bmp.data()), bmp.size());
-
-    std::cout << "Width: " << infoHeader.width << " Height: " << infoHeader.height << std::endl;
-}
-
+#include <BMPReader.h>
 
 int main(int argc, char* argv[])
 {
 
-  // gfx.fillScreen(0x00)
-  // wiringPiSPIDataRW(0, buffer, 1);
-  // gfx.setRotation(1); // now canvas is 11x21
-  // wiringPiSPIDataRW(0, buffer, 1);
-  // gfx.fillCircle(5, 10, 5, 0xAA);
   if (argc <= 1)
   {
     std::cout << "Not enough arguments!" << std::endl;
@@ -83,20 +29,15 @@ int main(int argc, char* argv[])
   Adafruit_ILI9341 device(320, 240, 0, 0, 0);
   device.reset();
   device.begin(0);
-  device.setRotation(0);
-
-  device.fillScreen(device.convertRGBto565(255, 0, 0));
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  device.fillScreen(ILI9341_BLACK);
+  device.setRotation(3);
   
-  BMPFileHeader fileHeader;
-  BMPInfoHeader infoHeader;
-  std::vector<uint8_t> bmp;
-  readBMP(argv[1], bmp, fileHeader, infoHeader);
+  BMPReader::BMPReader bmpParser(argv[1]);
 
-  device.drawBitmap(0, 0, bmp.data(), infoHeader.width, infoHeader.height, ILI9341_BLACK, ILI9341_WHITE);
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  for(int i=0; i<4; i++)
+  {
+    device.setRotation(i);
+    device.drawRGBBitmap(0, 0, bmpParser.pixelData.data(), bmpParser.width, bmpParser.height);
+  }  
   device.reset();
   return 1;
 }
