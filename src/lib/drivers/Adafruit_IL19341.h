@@ -137,7 +137,7 @@ class Adafruit_ILI9341 : public PiWiringSPIDriver {
 public:
   int _rst = 0;
   int rotation = 0;
-  Adafruit_ILI9341(int8_t cs, int8_t dc, int8_t rst = -1);
+  Adafruit_ILI9341(int16_t w, int16_t h, int8_t cs, int8_t dc, int8_t rst = -1);
 
   void begin(uint32_t freq = 0);
   void setRotation(uint8_t r);

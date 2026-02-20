@@ -74,7 +74,7 @@
     @param  rst  Reset pin # (optional, pass -1 if unused).
 */
 /**************************************************************************/
-Adafruit_ILI9341::Adafruit_ILI9341(int8_t cs, int8_t dc, int8_t rst){}
+Adafruit_ILI9341::Adafruit_ILI9341(int16_t w, int16_t h, int8_t cs, int8_t dc, int8_t rst) : PiWiringSPIDriver(w, h) {}
 
 
 // clang-format off

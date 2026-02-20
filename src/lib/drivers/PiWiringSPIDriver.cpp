@@ -4,8 +4,8 @@
 #include <chrono>
 #include <iostream>
 
-PiWiringSPIDriver::PiWiringSPIDriver()
-: Adafruit_GFX(250, 250)
+PiWiringSPIDriver::PiWiringSPIDriver(int16_t w, int16_t h)
+: Adafruit_GFX(w, h)
 {
   wiringPiSetupPinType(WPI_PIN_BCM);
   pinMode(RPI_CS_PIN, OUTPUT);
@@ -14,10 +14,10 @@ PiWiringSPIDriver::PiWiringSPIDriver()
   digitalWrite(RPI_RST_PIN, LOW);
   digitalWrite(RPI_CS_PIN, HIGH);
   digitalWrite(RPI_DC_PIN, HIGH);
-  wiringPiSPISetup(0, 5000000);
+  wiringPiSPISetup(0, 24000000);
 }
 
-void PiWiringSPIDriver::SPI_DC_LOW()
+void PiWiringSPIDriver::SPI_DC_LOW() // Command mode
 {
   digitalWrite(RPI_DC_PIN, LOW);
 }
@@ -40,15 +40,14 @@ void PiWiringSPIDriver::SPI_CS_HIGH()
 void PiWiringSPIDriver::reset()
 {
   digitalWrite(RPI_RST_PIN, HIGH);
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  digitalWrite(RPI_DC_PIN, LOW);
+  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  digitalWrite(RPI_RST_PIN, LOW);
 }
 
 void PiWiringSPIDriver::sendCommand(uint8_t commandByte, const uint8_t *dataBytes,
                                   uint8_t numDataBytes) {
   // SPI_BEGIN_TRANSACTION();
-  // if (_cs >= 0)
-  //   SPI_CS_LOW();
+  SPI_CS_LOW();
 
   uint8_t buf[numDataBytes];
   std::memcpy(buf, dataBytes, numDataBytes);   
@@ -63,8 +62,8 @@ void PiWiringSPIDriver::sendCommand(uint8_t commandByte, const uint8_t *dataByte
   wiringPiSPIDataRW(0, buf, numDataBytes);
   // printArr(buf, numDataBytes);    
 
-  // if (_cs >= 0)
-  //   SPI_CS_HIGH();
+
+  SPI_CS_HIGH();
   // SPI_END_TRANSACTION();
 }
 
@@ -77,9 +76,9 @@ void PiWiringSPIDriver::writeCommand(uint8_t commandByte)
 
 void PiWiringSPIDriver::SPI_WRITE16(uint16_t w)
 {
-  uint8_t buf = w ^ 0xFF00;
+  uint8_t buf = (uint8_t)(w >> 8);
   wiringPiSPIDataRW(0, &buf, 1);
-  buf = w ^ 0x00FF;
+  buf = (uint8_t)w; 
   wiringPiSPIDataRW(0, &buf, 1);
 }
 
