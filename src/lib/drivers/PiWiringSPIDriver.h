@@ -13,7 +13,7 @@ private:
 
 public:
 
-  PiWiringSPIDriver();
+  PiWiringSPIDriver(int16_t w, int16_t h);
   void SPI_DC_LOW();
   void SPI_DC_HIGH();
   void SPI_CS_LOW();

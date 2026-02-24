@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <chrono>
 #include <cstdlib>
+#include <cstdint>
 #include <ctime>
 #include <iostream>
 #include <memory>
@@ -14,25 +15,29 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include <thread>
+#include <BMPReader.h>
 
 int main(int argc, char* argv[])
 {
 
-  // gfx.fillScreen(0x00)
-  // wiringPiSPIDataRW(0, buffer, 1);
-  // gfx.setRotation(1); // now canvas is 11x21
-  // wiringPiSPIDataRW(0, buffer, 1);
-  // gfx.fillCircle(5, 10, 5, 0xAA);
+  if (argc <= 1)
+  {
+    std::cout << "Not enough arguments!" << std::endl;
+    return 0;
+  }
 
-  Adafruit_ILI9341 device(0, 0, 0);
+  Adafruit_ILI9341 device(320, 240, 0, 0, 0);
   device.reset();
   device.begin(0);
-  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-  device.setAddrWindow(5, 5, 25, 25);
-  device.fillScreen(device.convertRGBto565(255, 0, 0));
-  device.invertDisplay(true);
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  device.invertDisplay(false);
-  device.reset();
+  device.setRotation(3);
   
+  BMPReader::BMPReader bmpParser(argv[1]);
+
+  for(int i=0; i<4; i++)
+  {
+    device.setRotation(i);
+    device.drawRGBBitmap(0, 0, bmpParser.pixelData.data(), bmpParser.width, bmpParser.height);
+  }  
+  device.reset();
+  return 1;
 }
